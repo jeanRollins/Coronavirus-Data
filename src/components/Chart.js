@@ -1,43 +1,44 @@
 import React , {useState} from 'react'
 import {Line, Pie} from 'react-chartjs-2'
 
-export default function Chart(props){
-
+export default function Chart(props) {
+    console.log('props***', props)
+ 
     const [chartsData, setChartData] = useState( props.dataChart )
     const [chart, setChart] = useState( false )
 
 
-    const chartFetch = () => {
-
+    const chartFetch = async () => {
+        
         if( props.type == 'Pie' ){
             setChart( <Pie
-                maintainAspectRatio = {false}
+                responsive = {true}
                 data={chartsData}
             /> )
         }
 
         if( props.type == 'Line' ){
-            setChart( <Line
-            
+            setChart( 
+            <Line
                 data={chartsData}
             /> )
         }
-    }
 
+    }
+    
     React.useEffect( () => {
         chartFetch()
+       
     }, [])
 
     return(
         <>
-            {chart}
+            {(chart)}
         </>
     )
 }
 
 export const FilterData = (data, colors) => {
-
-    console.log('filter ***** :', data)
 
     let lastIndex = ( ( data.length ) - 1 )
 
