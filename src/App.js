@@ -1,11 +1,8 @@
 import React , { useState , useEffect } from 'react'
-
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
-
 import Container from '@material-ui/core/Container'
 import {GetDataCountries , GetNoticeNews} from './Data'
-
 import {formatNumber} from './Commons'
 //components
 import Loading from './components/Loading'
@@ -14,9 +11,7 @@ import Select from 'react-select'
 import { transformData } from './components/Autocomplete'
 import Rechart from './components/Rechart'
 import Bar from './components/Bar'
-
 import {getMonth} from './Commons'
-import Footer from './components/Footer'
 
 function App() {
 
@@ -34,15 +29,11 @@ function App() {
   const setStateCountryName = (name) => setCountryName(name)
   const setStateDataChart   = (chartDataTemp) => setChartData(chartDataTemp.map( (row) => (row) ))
 
-
- 
   const setData = async () => {
 
     if( ( countriesData[countryName] !== false )     && 
         ( countriesData[countryName] !== undefined ) &&
         ( lastConfirmated !== false )  ){
-
-      const  colors = [ 'red' , 'green' , 'blue' ]
 
       let dataChartTemp =  getLastData( countriesData[countryName]).map( (row) => ({
         name : row.date.substring(5, 9)   , 
@@ -51,13 +42,8 @@ function App() {
         confirmed   : row.confirmed  ,
         country : countryName 
       }))
-
-      console.log('countriesData[countryName]' , countriesData[countryName]);
-      
-      
       setStateDataChart( dataChartTemp )
       setLoop(false) 
-
     } 
   }
 
@@ -164,7 +150,7 @@ function App() {
             keys  = {'Recuperados'}
             data  = {chartData}
             chart = {'syncAreaChart'}
-            title = { 'Total recuperados : ' + formatNumber.new(lastItem.recovered)  + " (" + lastItem.date + ")" }
+            title = { 'Total recuperados : ' + formatNumber.new(lastItem.recovered)   }
           />
         </Grid>
       </Grid>
@@ -183,7 +169,9 @@ function App() {
       </Grid>
 
     </Container>
-    <Footer/>
+    <Bar
+      type = {'footer'}
+    />
   </>
     ) : (
       <Loading/>
