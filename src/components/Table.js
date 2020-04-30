@@ -21,13 +21,14 @@ function TableResponsive(props) {
                 >
                 <Table className={""} aria-label="simple table" >
                 <TableHead>
-                    <TableRow>
+                    <TableRow >
                         { Object.keys(props.headers).map( (row) => {
                             let dataTemp = props.headers[row]
 
                             return <TableCell 
                                         key={row} 
-                                        align={dataTemp.align}  
+                                        align={dataTemp.align} 
+                                        style = {{ color : '#737373' }} 
                                     > 
                                         {dataTemp.name}
                                     </TableCell>
@@ -37,11 +38,11 @@ function TableResponsive(props) {
                 </TableHead>
                 <TableBody>
                 { props.data.map( (data) => (
-                    <TableRow key={data.date}>
-                        <TableCell align="center" style={{width : '100%'}}> {data.date.substring(5, 9)}</TableCell>
-                        <TableCell align="right">{ formatNumber.new(data.confirmed) }</TableCell>
-                        <TableCell align="right">{ formatNumber.new(data.deaths)}</TableCell>
-                        <TableCell align="right">{ formatNumber.new(data.recovered)}</TableCell>
+                    <TableRow key={data.date} >
+                        <TableCell style = {{ color : '#737373' , width : '100%' }} align="center"> {data.date.substring(5, 9)}</TableCell>
+                        <TableCell style = {{ color : '#737373' }} align="right">{ formatNumber.new(data.confirmed) }</TableCell>
+                        <TableCell style = {{ color : '#737373' }} align="right">{ formatNumber.new(data.deaths)}</TableCell>
+                        <TableCell style = {{ color : '#737373' }} align="right">{ formatNumber.new(data.recovered)}</TableCell>
                     </TableRow>
 
                 ))}

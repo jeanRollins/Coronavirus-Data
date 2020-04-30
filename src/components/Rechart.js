@@ -1,135 +1,121 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import Typography from '@material-ui/core/Typography'
 import {
-  PieChart, Pie, Sector, Cell, Legend, Tooltip
-} from 'recharts';
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer ,PieChart, Pie, Sector, Cell
+} from 'recharts'
 
-const data = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 },
-  { name: 'Group D', value: 200 },
-];
+export const FilterData = (data) => {
 
-const data01 = [
-  { name: 'Group A', value: 400 }, { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 }, { name: 'Group D', value: 200 },
-];
-const data02 = [
-  { name: 'A1', value: 100 },
-  { name: 'A2', value: 300 },
-  { name: 'B1', value: 100 },
-  { name: 'B2', value: 80 },
-  { name: 'B3', value: 40 },
-  { name: 'B4', value: 30 },
-  { name: 'B5', value: 50 },
-  { name: 'C1', value: 100 },
-  { name: 'C2', value: 200 },
-  { name: 'D1', value: 150 },
-  { name: 'D2', value: 50 },
-];
+  let lastIndex = ( ( data.length ) - 1 )
+  let contaminatedActives = ( data[lastIndex].confirmed  - ( data[lastIndex].recovered + data[lastIndex].deaths )) 
+  return {
+      deaths : data[lastIndex].deaths    ,
+      recovered : data[lastIndex].recovered ,
+      contaminatedActives 
+  }
+}
 
+export default function Rechart(props) {
+  let chart = null 
+
+  if( props.chart == 'syncAreaChart' ) {
+    chart = syncAreaChart(props.data, props.keys, props.color ,props.title) 
+  }
+  if( props.chart == 'PieChartWithCustomizedLabel' ) {
+    chart = PieChartWithCustomizedLabel(props.data) 
+  }
+  
+  return (
+    <> 
+      {chart}
+    </> 
+  )
+}
+
+function syncAreaChart (dataChart, key ,color = null ,title ) {
+
+  color = ( color === null ) ? '82ca9d' : color 
+
+  return(
+    <>
+      <Typography style={{ marginBottom : '20px' }}  component="h2" className="textPrimary">
+        {title} 
+      </Typography>
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart
+     
+            data={dataChart}
+            syncId="anyId"
+            margin={{
+                top: 10, right: 30, left: 0, bottom: 0,
+            }}
+            >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Area 
+            type = "monotone" 
+            dataKey = {key} 
+            stroke = { "#" + color } 
+            fill = { "#" + color } 
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </>
+  )
+}
+
+
+
+
+//
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-
-
-export default function  Rechart(props){
-
-    let lastDay =  (props.dates.length - 1 )
-
-    const [chart , setChart] = useState(false)
-    const [dates , setDates] = useState(  translateData(props.dates[lastDay]) )
-
-
-    useEffect( () => {
-
-      if(  props.type == 'PieChartWithCustomizedLabel' ){
-        setChart( PieChartWithCustomizedLabel(dates) )
-      }
-      if(  props.type == 'TwoSimplePieChart' ){
-        setChart( TwoSimplePieChart(dates) )
-      }
-      if(  props.type == 'TwoLevelPieChart' ){
-        setChart( TwoLevelPieChart(dates) )
-      }
-    
-    }, [])
-
-  
-
-    return (
-        <>
-            {chart}
-        </>
-    )
-  
-}
-
-function translateData (  dates ){
-
-  return[ 
-    {
-      name  : dates.recovered  ,
-      
-      value : dates.recovered
-    },
-    {
-      name  : dates.deaths  ,
-      value : dates.deaths
-    },
-    {
-      name  : dates.confirmed  ,
-      value : dates.confirmed
-    },
- 
-  ]
-}
-
-function TwoSimplePieChart(dates){
-
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({
+  cx, cy, midAngle, innerRadius, outerRadius, percent, index,
+}) => {
+   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
   return (
-    <>
-      <PieChart width={400} height={400}>
-        <Pie dataKey="value" isAnimationActive={false} data={dates} cx={200} cy={200} outerRadius={80} fill="#8884d8" label />
-        <Tooltip />
-      </PieChart>
-    </>
-  )
-}
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
-function TwoLevelPieChart(dates){
-  console.log('TwoLevelPieChart**' , dates);
 
+
+
+export const PieChartWithCustomizedLabel = (dataChart) => {
+
+ console.log('dataChart***' , dataChart);
+
+ const datas = [
+  { name: 'Group A', value: dataChart[4].confirmed },
+  { name: 'Group B', value: dataChart[4].Muertos },
+];
   
-  return (
-    <>
-      <PieChart width={400} height={400}>
-        <Pie data={dates} dataKey="value" cx={200} cy={200} innerRadius={70} outerRadius={90} fill="#82ca9d" label />
-      </PieChart>
-    </>
-  )
-}
-
-function PieChartWithCustomizedLabel(dates){
-    
-    console.log('data', dates)
-    
     return (
         <PieChart width={400} height={400}>
-            <Pie
-                data={dates}
-                cx={200}
-                cy={200}
-                labelLine={false}
-                
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                >
-                {
-                    dates.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
-                }
-            </Pie>
-        </PieChart>
-    )
+        <Pie
+          data={datas}
+          cx={200}
+          cy={200}
+          labelLine={false}
+          label={renderCustomizedLabel}
+          outerRadius={80}
+          fill="#8884d8"
+          dataKey="value"
+        >
+          {
+            datas.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
+          }
+        </Pie>
+      </PieChart>
+    );
+  
 }

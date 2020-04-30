@@ -19,3 +19,26 @@ export var formatNumber = {
     return this.formatear(num);
     }
 }
+
+export const months = [
+    'Enero'   , 
+    'Febrero' ,
+    'Marzo' ,
+    'Abril' ,
+    'Mayo'  ,
+    'Junio' , 
+    'Julio' ,
+    'Agosto'     ,
+    'Septiembre' ,
+    'Octubre'    ,
+    'Noviembre'  ,
+    'Diciembre'
+]
+
+export const getMonth = () => {
+
+    let currentdate = new Date() 
+    const month =  parseInt( currentdate.getMonth() )
+
+    return months[month]   
+}

@@ -10,30 +10,24 @@ import 'typeface-roboto'
 export default function Loading(){
     return (
         <> 
-          <Container style={{marginTop : '30px'}}>
-     
-
-                    <Grid container   
-                        spacing={1} 
-                        style={{marginTop: '300px' }}
-                    >
-                        <Grid  item xs={3}  ></Grid>
-                        <Grid  item xs={2}  >
-                            <CircularProgress /> 
-                        </Grid>
-                        <Grid  item xs={3}  >
-
-                            <Typography >
-                               <span style={{verticalAlign: 'sub' }}>   Cargando... </span> 
-                            </Typography>
-                        
-                        </Grid>
+           <Container style={{marginTop : '30px'}} >
+                <Grid container   
+                    spacing={1} 
+                    style={{marginTop: '300px' }}
+                >
+                    <Grid  item xs={3} lg = {4}  ></Grid>
+                    <Grid  item xs={2} lg = {1} >
+                        <CircularProgress /> 
                     </Grid>
-                </Container>
+                    <Grid  item xs={3}  >
 
-
-    
-
+                        <Typography >
+                            <span style={{verticalAlign: 'sub' }}>   Cargando... </span> 
+                        </Typography>
+                    
+                    </Grid>
+                </Grid>
+            </Container>
         </>
     )
 } 

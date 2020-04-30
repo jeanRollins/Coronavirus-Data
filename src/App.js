@@ -1,133 +1,123 @@
 import React , { useState , useEffect } from 'react'
 
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import IconButton from '@material-ui/core/IconButton'
-
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
 
 import Container from '@material-ui/core/Container'
-import {GetDataCountries} from './Data'
+import {GetDataCountries , GetNoticeNews} from './Data'
 
 import {formatNumber} from './Commons'
 //components
 import Loading from './components/Loading'
-import Chart , {FilterData} from './components/Chart'
 import TableResponsive  from './components/Table'
 import Select from 'react-select'
- import {transformData} from './components/Autocomplete'
+import { transformData } from './components/Autocomplete'
+import Rechart from './components/Rechart'
+import Bar from './components/Bar'
 
-
-function getLastData(arr, last = true ){
-  const arrayLenght = arr.length 
-  const daysAfters = ( arrayLenght - 4 )
-  const days = []
-
-  if(!last){
-    return arr[ arrayLenght - 1 ]
-  }
-  for (let i = daysAfters ; i < arr.length; i++) {
-    
-    days.push(arr[i])
-  }
-  return days
-}
-
-
+import {getMonth} from './Commons'
+import Footer from './components/Footer'
 
 function App() {
 
   const  [ countriesData , setCountriesData ] = useState(false) 
+
   const  [ countryName , setCountryName ] = useState('Chile') 
-
-
   const  [ lastConfirmated, setLastConfirmated ] = useState(false) 
   const  [ lastItem , setLastItem ] = useState(false) 
   const  [ keysCountries , setKeysCountries ] = useState([]) 
-
   const  [ chartData  , setChartData  ] = useState(false) 
-  const  [selectAutocomplete, setSelectAutocomplete] = useState('') 
+  const  [ loop  , setLoop  ] = useState(false) 
 
   const headerTable = [ { name:'Día',align:'center'}, {name:'Infec.', align:'left'}, {name: 'Muertes', align:'left' }, {name: 'Recuperados', align:'left' } ] 
 
-  const dataChart = {
-    datasets : [
-      {
-          label : 'Lorem ipzum Dolor',
-          borderWidth : 4 
-      }
-    ] 
-  }
   const setStateCountryName = (name) => setCountryName(name)
+  const setStateDataChart   = (chartDataTemp) => setChartData(chartDataTemp.map( (row) => (row) ))
+
+
+ 
+  const setData = async () => {
+
+    if( ( countriesData[countryName] !== false )     && 
+        ( countriesData[countryName] !== undefined ) &&
+        ( lastConfirmated !== false )  ){
+
+      const  colors = [ 'red' , 'green' , 'blue' ]
+
+      let dataChartTemp =  getLastData( countriesData[countryName]).map( (row) => ({
+        name : row.date.substring(5, 9)   , 
+        Muertos      : row.deaths ,
+        Recuperados   : row.recovered  ,
+        confirmed   : row.confirmed  ,
+        country : countryName 
+      }))
+
+      console.log('countriesData[countryName]' , countriesData[countryName]);
+      
+      
+      setStateDataChart( dataChartTemp )
+      setLoop(false) 
+
+    } 
+  }
+
+  function getLastData(arr, last = true ){
+    const arrayLenght = countriesData[countryName].length 
+    const daysAfters = ( arrayLenght - 5 )
+    const days = []
+  
+    if( !last ){
+      return arr[ arrayLenght - 1 ]
+    }
+    for (let i = daysAfters ; i < arr.length; i++) {
+      
+      days.push(arr[i])
+    }
+    return days
+  }
 
   const fetchApi = async () => {
-
+    setLoop(true) 
     try {
       let dataLastDays = await GetDataCountries()
       await setCountriesData( dataLastDays )
-      console.log('countriesData* : ' , dataLastDays[countryName])
-
       await setLastConfirmated( getLastData( dataLastDays[countryName]))
       await setLastItem( getLastData(dataLastDays[countryName], false ) )  
-
       await setKeysCountries( Object.keys(dataLastDays))
-      await setData()
     } 
     catch (error) {
       console.log(error)
     }
-
+    setLoop(false) 
   }
 
-  const setData = async () => {
-    
-    if( ( countriesData[countryName] !== false ) && 
-        ( countriesData[countryName] !== undefined ) ){
-
-      dataChart.datasets[0] =  FilterData(  countriesData[countryName] , [ 'red' , 'green' , 'blue' ] )
-      dataChart.labels = ['Muertos : ' + dataChart.datasets[0].data[1] , 'Recuperados : ' + dataChart.datasets[0].data[0] , 'Contaminados a la fecha: ' + dataChart.datasets[0].data[2] ]
-      
-    }
-    
-    
-  }
-
-
-  setData()
-  
   useEffect( () => {
+
     fetchApi()
     setData()
-    console.log('USEEFFECT ***************' )
+    
+  }, [ loop, countryName ])
 
-  }, [countryName])
-  
-  return ( (countriesData !== false) && ( lastConfirmated !== false) ) ? (
+  return ( ( countriesData   !== false ) && 
+           ( lastConfirmated !== false ) && 
+           ( chartData       !== false  ) ) ? (
+    
   <>
+    <Bar
+      title = {'Coronavirus Chile ' + getMonth() + ' 2020'}
+    />
 
-    <AppBar position="static" >
-      <Toolbar>
-        <IconButton edge="start"  color="inherit" aria-label="menu">
-        
-        </IconButton>
-        <Typography variant="h6" >
-          Coronavirus Chile abril 2020
-        </Typography>
-      
-      </Toolbar>
-    </AppBar>
-
-    <Container style={{marginTop : '20px'}} >
+    <Container style={{marginTop : '20px' , marginBottom : '40px'}} >
 
       <Grid container   spacing={1} >
         <Grid  item xs={12}  >
-          
-          
         <Select 
-            options  = { transformData( keysCountries ) }
-            value    = { countryName }
-            onChange = { e =>  { setStateCountryName( e.value ) }}
+          className       = "basic-single"
+          classNamePrefix = "select"
+          options         = { transformData( keysCountries ) }
+          defaultValue    = { countryName }
+          onChange        = { e => setStateCountryName( e.value ) }
+          placeholder     = {'Seleccione país...'} 
         />
         
         </Grid>
@@ -135,33 +125,66 @@ function App() {
 
       <Grid container style={{marginTop : '20px'}}  spacing={1} >
         <Grid  item xs={12}  >
-          
           <TableResponsive
             headers = {headerTable}
             data = {lastConfirmated}
           />
-        
         </Grid>
       </Grid>
 
-      <Grid container style={{marginTop : '50px' }} spacing={1} >
-        <Grid  item xs={12}  >
-          <Typography  component="h2" className="textPrimary">
-             Total contaminados : { formatNumber.new(lastItem.confirmed)  + " (" + lastItem.date + ")" } 
-          
-          </Typography>
-        </Grid>
-        <Grid  item xs={12}  >
+      <Typography style={{ marginTop : '30px' }} variant="h6" className="textPrimary">
+        {'Infectados ' + countryName + ' : ' + formatNumber.new(lastItem.confirmed)  + " (" + lastItem.date + ")" } 
+      </Typography>
 
-          <Chart
-            type      = { 'Pie' }
-            dataChart = { dataChart }
+      <Grid container style={{ marginTop : '30px' }} spacing={1} >
+        <Grid  item 
+          xs={12} 
+          sm={12} 
+          md={6} 
+          lg={6} 
+          xl={6}
+        >
+          <Rechart
+            keys  = {'Muertos'}
+            data  = {chartData}
+            chart = {'syncAreaChart'}
+            color = {'ff3333'}
+            title = { 'Total muertes : ' + formatNumber.new(lastItem.deaths )  }
+          />
+        </Grid>
+
+        <Grid  item 
+          xs={12} 
+          sm={12} 
+          md={6} 
+          lg={6} 
+          xl={6}
+        >
+          <Rechart
+            keys  = {'Recuperados'}
+            data  = {chartData}
+            chart = {'syncAreaChart'}
+            title = { 'Total recuperados : ' + formatNumber.new(lastItem.recovered)  + " (" + lastItem.date + ")" }
           />
         </Grid>
       </Grid>
+
+      <Grid container style={{ marginTop : '30px' }} spacing={1} >
+        <Grid  item 
+          xs={12} 
+          sm={12} 
+          md={6} 
+          lg={6} 
+          xl={6}
+        >
+        
+        </Grid>
+
+      </Grid>
+
     </Container>
-    
-    </>
+    <Footer/>
+  </>
     ) : (
       <Loading/>
     )
